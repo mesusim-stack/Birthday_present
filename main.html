@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Happy Birthday!</title>
+  
+  <!-- Google Fonts: Dancing Script & Playfair Display -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@500;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS via Play CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            midnight: '#0b1026',
+            lavender: '#b9a7e0',
+            silver: '#c0c6d4',
+            gold: '#f5c96a',
+          },
+          fontFamily: {
+            dancing: ['"Dancing Script"', 'cursive'],
+            playfair: ['"Playfair Display"', 'serif'],
+          }
+        }
+      }
+    };
+  </script>
+
+  <!-- Canvas Confetti Library -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+
+  <!-- Compiled SCSS Animations -->
+  <link rel="stylesheet" href="animations.css">
+
+  <style>
+    /* 3D Envelope perspective */
+    .perspective-container {
+      perspective: 1200px;
+    }
+    
+    /* Paper texture for letter card */
+    .paper-card {
+      background: #fdfbf7;
+      background-image: radial-gradient(#ece4d4 0.75px, transparent 0.75px), radial-gradient(#ece4d4 0.75px, #fdfbf7 0.75px);
+      background-size: 30px 30px;
+      background-position: 0 0, 15px 15px;
+    }
+
+    /* Flap clipping paths */
+    .clip-flap-top {
+      clip-path: polygon(0 0, 100% 0, 50% 100%);
+    }
+    .clip-pocket-left {
+      clip-path: polygon(0 0, 50% 50%, 0 100%);
+    }
+    .clip-pocket-right {
+      clip-path: polygon(100% 0, 50% 50%, 100% 100%);
+    }
+    .clip-pocket-bottom {
+      clip-path: polygon(0 100%, 50% 45%, 100% 100%);
+    }
+
+    /* Custom luxury gold scrollbar for the letter card */
+    .letter-scroll {
+      scrollbar-width: thin;
+      scrollbar-color: rgba(180, 128, 22, 0.45) transparent;
+    }
+    .letter-scroll::-webkit-scrollbar {
+      width: 4px;
+    }
+    .letter-scroll::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .letter-scroll::-webkit-scrollbar-thumb {
+      background-color: rgba(180, 128, 22, 0.45);
+      border-radius: 9999px;
+    }
+    .letter-scroll::-webkit-scrollbar-thumb:hover {
+      background-color: rgba(180, 128, 22, 0.75);
+    }
+  </style>
+</head>
+<body class="min-h-screen w-full bg-gradient-to-b from-[#0b1026] via-[#141032] to-[#251742] text-slate-100 flex flex-col items-center justify-between p-4 md:p-8 relative overflow-x-hidden select-none anim-fade-in">
+
+  <!-- Soft Glowing Moon -->
+  <div class="absolute top-6 right-6 md:top-12 md:right-16 pointer-events-none z-10" aria-hidden="true">
+    <div class="relative w-16 h-16 md:w-24 md:h-24 rounded-full bg-gradient-to-tr from-[#fce4a6] to-[#fffdf5] shadow-[0_0_50px_rgba(245,201,106,0.65),0_0_100px_rgba(185,167,224,0.3)]">
+      <div class="absolute top-3 left-4 w-3 h-3 rounded-full bg-[#fae19c]/40"></div>
+      <div class="absolute top-8 left-10 w-5 h-5 rounded-full bg-[#fae19c]/30"></div>
+    </div>
+  </div>
+
+  <!-- Twinkling Stars Sky Container -->
+  <div id="stars-container" class="absolute inset-0 pointer-events-none z-0 overflow-hidden" aria-hidden="true"></div>
+
+  <!-- Top Decorative Header -->
+  <header class="relative z-20 text-center mt-4 md:mt-8">
+    <h1 class="font-dancing font-bold text-5xl sm:text-6xl md:text-7xl lg:text-8xl text-transparent bg-clip-text bg-gradient-to-r from-gold via-[#fff2cf] to-lavender drop-shadow-[0_4px_24px_rgba(245,201,106,0.5)]">
+      Happy Birthday
+    </h1>
+    <p class="font-playfair italic text-lavender/80 text-sm md:text-lg mt-2 tracking-wide">
+      A heartwarming greeting, just for you
+    </p>
+  </header>
+
+  <!-- Interactive Envelope Area -->
+  <main class="relative z-20 flex flex-col items-center justify-center my-auto py-8">
+    
+    <!-- Floating Envelope Outer Shell -->
+    <div id="envelopeWrapper" class="anim-float perspective-container">
+      <div 
+        id="envelope" 
+        class="relative w-[340px] sm:w-[440px] md:w-[500px] h-[250px] sm:h-[275px] md:h-[285px] cursor-pointer group transition-transform duration-300 hover:scale-[1.02]"
+        role="button"
+        tabindex="0"
+        aria-label="Birthday Envelope. Click to open"
+      >
+        <!-- 1. Envelope Back Wall -->
+        <div class="absolute inset-0 bg-gradient-to-b from-[#1c173b] to-[#110e28] rounded-2xl border border-lavender/25 shadow-2xl z-10"></div>
+
+        <!-- 2. The Letter Card (Concealed completely when closed, rises to exact center when opened) -->
+        <div 
+          id="letterCard" 
+          class="absolute left-1/2 top-1/2 w-[94vw] max-w-[490px] sm:max-w-[550px] md:max-w-[580px] paper-card rounded-2xl p-5 sm:p-7 md:p-8 shadow-[0_15px_50px_rgba(0,0,0,0.6),0_0_30px_rgba(245,201,106,0.3)] border border-gold/50 flex flex-col z-15"
+          style="transform: translate(-50%, 60px) scale(0.9); opacity: 0; visibility: hidden; pointer-events: none;"
+        >
+          <!-- Elegant Gold Border Frame Accent -->
+          <div class="absolute inset-2 border border-gold/30 rounded-xl pointer-events-none"></div>
+
+          <!-- Letter Header / Recipient -->
+          <div class="relative z-10 mb-3 border-b border-gold/25 pb-2">
+            <div class="flex items-center justify-between">
+              <span id="letterRecipient" class="font-dancing font-bold text-2xl sm:text-3xl text-[#b48016]">
+                Dear Ate Anne,
+              </span>
+              <span class="text-gold text-lg">✦</span>
+            </div>
+          </div>
+
+          <!-- Letter Body Message: All paragraphs displayed openly at once -->
+          <div class="relative z-10 my-2">
+            <div id="letterBody" class="font-playfair text-[#2a2438] text-[12px] sm:text-[13.5px] md:text-[14.5px] leading-relaxed italic space-y-3">
+            </div>
+          </div>
+
+          <!-- Letter Closing & Sender -->
+          <div class="relative z-10 mt-3 pt-1 flex flex-col items-end">
+            <p id="letterClosing" class="font-dancing text-lg sm:text-xl text-[#7a5814]">
+              Love,
+            </p>
+            <p id="letterSender" class="font-dancing font-bold text-2xl sm:text-3xl text-[#b48016]">
+              Gabby
+            </p>
+          </div>
+
+          <!-- Close Letter Button -->
+          <div class="relative z-20 mt-4 pt-2 border-t border-gold/25 flex justify-center">
+            <button 
+              id="closeLetterBtn" 
+              type="button" 
+              class="px-6 py-2 text-xs sm:text-sm font-playfair font-semibold tracking-wider uppercase text-midnight bg-gradient-to-r from-gold/90 via-[#fae39d] to-gold/90 hover:from-gold hover:to-[#fff0bd] rounded-full shadow hover:shadow-md transition-all duration-200 cursor-pointer flex items-center gap-1.5 active:scale-95"
+            >
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+              </svg>
+              <span>Close letter</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 3. Envelope Front Pocket (Left, Right, and Bottom Folds) -->
+        <div class="absolute inset-0 rounded-b-2xl overflow-hidden pointer-events-none z-25">
+          <!-- Left Fold -->
+          <div class="absolute inset-0 clip-pocket-left bg-gradient-to-r from-[#171333] to-[#251e4a] border-l border-lavender/20"></div>
+          <!-- Right Fold -->
+          <div class="absolute inset-0 clip-pocket-right bg-gradient-to-l from-[#171333] to-[#251e4a] border-r border-lavender/20"></div>
+          <!-- Bottom Fold -->
+          <div class="absolute inset-0 clip-pocket-bottom bg-gradient-to-t from-[#27204f] to-[#362c6d] border-b border-lavender/30 shadow-lg"></div>
+        </div>
+
+        <!-- 4. Envelope Top Flap (Animated with SCSS flap_open / flap_close) -->
+        <div 
+          id="envelopeFlap" 
+          class="absolute top-0 left-0 right-0 h-[145px] sm:h-[165px] md:h-[175px] clip-flap-top bg-gradient-to-b from-[#342b65] to-[#463983] border-t border-lavender/40 shadow-xl transition-all"
+          style="z-index: 35; transform-origin: top center;"
+        >
+          <!-- Golden Wax Seal Emblem at Flap Tip -->
+          <div class="absolute bottom-2 left-1/2 -translate-x-1/2 w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-gradient-to-br from-gold via-[#e6b64f] to-[#a0741c] shadow-[0_2px_8px_rgba(0,0,0,0.4)] flex items-center justify-center text-midnight font-playfair font-bold text-xs border border-[#ffeaa7]">
+            ✦
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Caption Underneath Envelope -->
+    <div class="mt-8 text-center">
+      <p 
+        id="envelopeCaption" 
+        class="font-playfair text-lavender tracking-widest text-sm md:text-base uppercase flex items-center justify-center gap-2 transition-opacity duration-300"
+      >
+        <span class="inline-block animate-bounce">💌</span>
+        <span>Tap to open</span>
+      </p>
+    </div>
+
+  </main>
+
+  <!-- Footer Navigation / Replay Link -->
+  <footer class="relative z-20 text-center py-4">
+    <a 
+      href="index.html" 
+      class="text-xs font-playfair tracking-wider text-silver/60 hover:text-gold transition-colors duration-200 underline underline-offset-4"
+    >
+      ← Back to surprise screen
+    </a>
+  </footer>
+
+  <script>
+    // ==============================================================================
+    // 💌 EDITABLE LETTER CONTENT
+    // Easily customize the aunt's name, message, and your name below:
+    // ==============================================================================
+    const LETTER_CONTENT = {
+      recipient: "Dear Ate Anne,",
+      body: `Happy Birthday po! Sana po masaya at puno ng pagmamahal ang araw ninyo, kasing ganda at kasing bait po ninyo.
+
+Salamat po sa pag-aalaga sa akin simula nung bata pa ako. Naaalala ko pa po nung binilhan niyo ako ng scooter dati, tuwang-tuwa po ako nun. Tapos nung elementary, pag wala akong notebook at pansulat, kayo po ang bumibili sa akin. Hindi ko po yun nakakalimutan.
+
+Naaalala ko rin po nung pumupunta tayo sa SM tapos naglalaro tayo sa arcade. Tanda ko pa po yun! Hindi ko pa po alam noon na papunta na pala kayo ng America. Hahaha. Lagi ko po kayong namimiss, dati pa po, kahit hindi ko alam kung paano sabihin.
+
+Kayo rin po ang nagpapabaon sa akin noong college. Kayo po ang pinakapaborito kong tita sa buong mundo, kahit noon pa po, hanggang ngayon.
+
+Maraming salamat po sa lahat-lahat. Mag-aaral po akong mabuti at magtatapos, at sana po masaya po kayo lagi sa America. Pag nakagraduate na po ako, ako naman po ang manlilibre sa inyo balang araw. Hahaha!
+
+Mahal na mahal ko po kayo, Ate Anne.`,
+      closing: "Love,",
+      sender: "Gabby"
+    };
+
+    // Populate letter DOM with configured content
+    document.getElementById('letterRecipient').textContent = LETTER_CONTENT.recipient;
+    
+    // Split into readable paragraphs
+    const letterBodyEl = document.getElementById('letterBody');
+    letterBodyEl.innerHTML = '';
+    LETTER_CONTENT.body.split('\n\n').forEach(paragraph => {
+      const p = document.createElement('p');
+      p.className = 'leading-relaxed';
+      p.textContent = paragraph.trim();
+      letterBodyEl.appendChild(p);
+    });
+
+    document.getElementById('letterClosing').textContent = LETTER_CONTENT.closing;
+    document.getElementById('letterSender').textContent = LETTER_CONTENT.sender;
+
+    // Generate magical cosmic sky: stationary stars, moving stars, big sparkle stars, and shooting stars
+    (function createCosmicSky() {
+      const container = document.getElementById('stars-container');
+      if (!container) return;
+      const frag = document.createDocumentFragment();
+
+      // 1. Stationary Twinkling Stars (Some stay)
+      const stationaryCount = 45;
+      for (let i = 0; i < stationaryCount; i++) {
+        const star = document.createElement('div');
+        const size = (Math.random() * 1.8 + 1).toFixed(1);
+        const top = (Math.random() * 100).toFixed(1);
+        const left = (Math.random() * 100).toFixed(1);
+        const delay = (Math.random() * 4).toFixed(2);
+        const duration = (2 + Math.random() * 3).toFixed(2);
+
+        star.className = 'absolute rounded-full bg-white anim-twinkle pointer-events-none';
+        star.style.width = `${size}px`;
+        star.style.height = `${size}px`;
+        star.style.top = `${top}%`;
+        star.style.left = `${left}%`;
+        star.style.animationDelay = `${delay}s`;
+        star.style.animationDuration = `${duration}s`;
+        star.style.boxShadow = '0 0 6px rgba(255, 255, 255, 0.85)';
+        frag.appendChild(star);
+      }
+
+      // 2. Moving / Drifting Stars (Background stars move)
+      const movingCount = 30;
+      for (let i = 0; i < movingCount; i++) {
+        const wrapper = document.createElement('div');
+        const top = (Math.random() * 95).toFixed(1);
+        const left = (Math.random() * 95).toFixed(1);
+        const driftDuration = (16 + Math.random() * 18).toFixed(1);
+        const driftDelay = (Math.random() * -15).toFixed(1);
+
+        wrapper.className = 'absolute anim-star-drift pointer-events-none';
+        wrapper.style.top = `${top}%`;
+        wrapper.style.left = `${left}%`;
+        wrapper.style.animationDuration = `${driftDuration}s`;
+        wrapper.style.animationDelay = `${driftDelay}s`;
+
+        const star = document.createElement('div');
+        const size = (Math.random() * 2 + 2).toFixed(1);
+        star.className = 'rounded-full bg-[#fdfbf7] anim-twinkle';
+        star.style.width = `${size}px`;
+        star.style.height = `${size}px`;
+        star.style.animationDelay = `${(Math.random() * 3).toFixed(2)}s`;
+        star.style.boxShadow = '0 0 8px rgba(245, 201, 106, 0.8), 0 0 16px rgba(185, 167, 224, 0.4)';
+
+        wrapper.appendChild(star);
+        frag.appendChild(wrapper);
+      }
+
+      // 3. Big Glowing & Sparkle Stars (Make some a bit big)
+      const bigStarCount = 14;
+      for (let i = 0; i < bigStarCount; i++) {
+        const isDrifting = i % 2 === 0;
+        const wrapper = document.createElement('div');
+        const top = (Math.random() * 90 + 5).toFixed(1);
+        const left = (Math.random() * 90 + 5).toFixed(1);
+
+        wrapper.className = isDrifting ? 'absolute anim-star-drift pointer-events-none' : 'absolute pointer-events-none';
+        wrapper.style.top = `${top}%`;
+        wrapper.style.left = `${left}%`;
+        if (isDrifting) {
+          wrapper.style.animationDuration = `${(22 + Math.random() * 12).toFixed(1)}s`;
+          wrapper.style.animationDelay = `${(Math.random() * -10).toFixed(1)}s`;
+        }
+
+        if (i % 2 === 0) {
+          // 4-pointed SVG sparkle diamond star
+          const starSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+          const starSize = Math.floor(Math.random() * 8 + 14); // 14px to 22px
+          starSvg.setAttribute('viewBox', '0 0 24 24');
+          starSvg.setAttribute('width', starSize);
+          starSvg.setAttribute('height', starSize);
+          starSvg.setAttribute('class', 'anim-star-sparkle text-[#f5c96a]');
+          starSvg.style.animationDelay = `${(Math.random() * 3).toFixed(2)}s`;
+          starSvg.style.animationDuration = `${(3 + Math.random() * 2).toFixed(2)}s`;
+          starSvg.style.filter = 'drop-shadow(0 0 8px rgba(245, 201, 106, 0.9))';
+
+          const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+          path.setAttribute('fill', 'currentColor');
+          path.setAttribute('d', 'M12 0L14.5 9.5L24 12L14.5 14.5L12 24L9.5 14.5L0 12L9.5 9.5Z');
+          starSvg.appendChild(path);
+          wrapper.appendChild(starSvg);
+        } else {
+          // Big luminous glowing orb (5px to 8px)
+          const bigOrb = document.createElement('div');
+          const orbSize = (Math.random() * 3 + 5).toFixed(1);
+          bigOrb.className = 'rounded-full bg-gradient-to-tr from-[#f5c96a] to-white anim-star-sparkle';
+          bigOrb.style.width = `${orbSize}px`;
+          bigOrb.style.height = `${orbSize}px`;
+          bigOrb.style.animationDelay = `${(Math.random() * 3).toFixed(2)}s`;
+          bigOrb.style.boxShadow = '0 0 12px rgba(245, 201, 106, 0.95), 0 0 24px rgba(185, 167, 224, 0.6)';
+          wrapper.appendChild(bigOrb);
+        }
+
+        frag.appendChild(wrapper);
+      }
+
+      // 4. Subtle Shooting Stars
+      const shootingStar1 = document.createElement('div');
+      shootingStar1.className = 'absolute top-12 left-1/4 w-28 h-[2px] bg-gradient-to-r from-transparent via-white to-transparent anim-shooting-star pointer-events-none';
+      shootingStar1.style.animationDelay = '2s';
+      frag.appendChild(shootingStar1);
+
+      const shootingStar2 = document.createElement('div');
+      shootingStar2.className = 'absolute top-24 left-2/3 w-36 h-[2px] bg-gradient-to-r from-transparent via-[#f5c96a] to-transparent anim-shooting-star pointer-events-none';
+      shootingStar2.style.animationDelay = '7s';
+      frag.appendChild(shootingStar2);
+
+      container.appendChild(frag);
+    })();
+
+    // ==============================================================================
+    // ENVELOPE INTERACTION & CONFETTI LOGIC
+    // ==============================================================================
+    const envelope = document.getElementById('envelope');
+    const flap = document.getElementById('envelopeFlap');
+    const letter = document.getElementById('letterCard');
+    const caption = document.getElementById('envelopeCaption');
+    const closeBtn = document.getElementById('closeLetterBtn');
+
+    let isOpen = false;
+    let hasConfettiFired = false;
+
+    // Celebratory Confetti Burst (Fires only once on initial open)
+    function fireCelebratoryConfetti() {
+      if (hasConfettiFired || typeof confetti !== 'function') return;
+      hasConfettiFired = true;
+
+      const colors = ['#f5c96a', '#b9a7e0', '#ffffff', '#ffd700', '#e0c3fc'];
+
+      // Center burst
+      confetti({
+        particleCount: 80,
+        spread: 100,
+        origin: { y: 0.6 },
+        colors: colors,
+        disableForReducedMotion: true
+      });
+
+      // Left cannon
+      setTimeout(() => {
+        confetti({
+          particleCount: 45,
+          angle: 60,
+          spread: 60,
+          origin: { x: 0.1, y: 0.7 },
+          colors: colors
+        });
+      }, 250);
+
+      // Right cannon
+      setTimeout(() => {
+        confetti({
+          particleCount: 45,
+          angle: 120,
+          spread: 60,
+          origin: { x: 0.9, y: 0.7 },
+          colors: colors
+        });
+      }, 400);
+    }
+
+    const envelopeWrapper = document.getElementById('envelopeWrapper');
+
+    // Open Envelope Action
+    function openEnvelope() {
+      if (isOpen) return;
+      isOpen = true;
+
+      // Make letter element active and visible for animation
+      letter.style.visibility = 'visible';
+      letter.style.pointerEvents = 'auto';
+
+      // Pause float animation while open so letter is completely steady to read
+      if (envelopeWrapper) envelopeWrapper.style.animationPlayState = 'paused';
+
+      // 1. Open the flap using flap_open animation
+      flap.classList.remove('anim-flap-close');
+      flap.classList.add('anim-flap-open');
+
+      // 2. Rise the letter to the exact center using letter_rise animation
+      letter.classList.remove('anim-letter-lower');
+      letter.classList.add('anim-letter-rise');
+
+      // 3. Update caption text
+      caption.innerHTML = '<span class="text-gold">✨</span> <span>Enjoy your special day!</span>';
+
+      // 4. Trigger confetti only on first open
+      setTimeout(fireCelebratoryConfetti, 600);
+    }
+
+    // Close Envelope Action
+    function closeEnvelope() {
+      if (!isOpen) return;
+      isOpen = false;
+
+      // Immediately disable pointer events on letter
+      letter.style.pointerEvents = 'none';
+
+      // 1. Lower the letter using letter_lower animation back into envelope
+      letter.classList.remove('anim-letter-rise');
+      letter.classList.add('anim-letter-lower');
+
+      // 2. Close flap after letter descends into the pocket
+      setTimeout(() => {
+        flap.classList.remove('anim-flap-open');
+        flap.classList.add('anim-flap-close');
+      }, 400);
+
+      // 3. Once lowering completes, completely conceal letter and resume gentle floating
+      setTimeout(() => {
+        if (!isOpen) {
+          letter.style.visibility = 'hidden';
+          letter.style.opacity = '0';
+          if (envelopeWrapper) envelopeWrapper.style.animationPlayState = 'running';
+        }
+      }, 950);
+
+      // 4. Reset caption
+      caption.innerHTML = '<span class="inline-block animate-bounce">💌</span> <span>Tap to open</span>';
+    }
+
+    // Toggle on envelope click (unless clicking directly inside the letter card)
+    envelope.addEventListener('click', (e) => {
+      // If clicking close button, let closeBtn handler take care of it
+      if (e.target.closest('#closeLetterBtn')) return;
+      
+      if (!isOpen) {
+        openEnvelope();
+      }
+    });
+
+    // Close button handler
+    closeBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      closeEnvelope();
+    });
+
+    // Keyboard accessibility (Space or Enter to open/close)
+    envelope.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        if (!isOpen) {
+          openEnvelope();
+        } else {
+          closeEnvelope();
+        }
+      }
+    });
+  </script>
+</body>
+</html>

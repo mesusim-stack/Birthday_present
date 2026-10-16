@@ -1,0 +1,14 @@
+{
+  "name": "website-for-tita-anne",
+  "version": "1.0.0",
+  "description": "Birthday surprise website with SCSS animation pipeline driven by YAML",
+  "main": "index.html",
+  "scripts": {
+    "build:scss": "node scripts/yaml-to-scss.js",
+    "build": "npm run build:scss"
+  },
+  "devDependencies": {
+    "js-yaml": "^4.1.0",
+    "sass": "^1.77.8"
+  }
+}

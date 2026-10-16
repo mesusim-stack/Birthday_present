@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>A Special Surprise</title>
+  
+  <!-- Google Fonts: Dancing Script & Playfair Display -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@500;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS via Play CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            midnight: '#0b1026',
+            lavender: '#b9a7e0',
+            silver: '#c0c6d4',
+            gold: '#f5c96a',
+          },
+          fontFamily: {
+            dancing: ['"Dancing Script"', 'cursive'],
+            playfair: ['"Playfair Display"', 'serif'],
+          }
+        }
+      }
+    };
+  </script>
+
+  <!-- Compiled SCSS Animations -->
+  <link rel="stylesheet" href="animations.css">
+</head>
+<body class="min-h-screen w-full bg-gradient-to-b from-[#0b1026] via-[#141032] to-[#251742] text-slate-100 flex items-center justify-center relative overflow-hidden select-none anim-fade-in">
+
+  <!-- Soft Glowing Moon -->
+  <div class="absolute top-8 right-8 md:top-14 md:right-20 pointer-events-none z-10" aria-hidden="true">
+    <div class="relative w-20 h-20 md:w-28 md:h-28 rounded-full bg-gradient-to-tr from-[#fce4a6] to-[#fffdf5] shadow-[0_0_60px_rgba(245,201,106,0.65),0_0_120px_rgba(185,167,224,0.35)]">
+      <!-- Moon crater accents -->
+      <div class="absolute top-4 left-5 w-4 h-4 rounded-full bg-[#fae19c]/40"></div>
+      <div class="absolute top-10 left-12 w-6 h-6 rounded-full bg-[#fae19c]/30"></div>
+      <div class="absolute top-14 left-6 w-3 h-3 rounded-full bg-[#fae19c]/25"></div>
+    </div>
+  </div>
+
+  <!-- Twinkling Stars Sky Container -->
+  <div id="stars-container" class="absolute inset-0 pointer-events-none z-0 overflow-hidden" aria-hidden="true"></div>
+
+  <!-- Main Center Content -->
+  <main class="relative z-20 flex flex-col items-center justify-center px-4 text-center">
+    <p class="font-playfair italic text-lavender/80 tracking-widest text-sm md:text-base mb-6 uppercase">
+      Something special awaits you
+    </p>
+
+    <!-- Large Surprise Button with Glow Pulse Animation -->
+    <button 
+      id="surpriseBtn" 
+      type="button"
+      class="group relative px-9 py-5 md:px-14 md:py-6 rounded-full font-playfair font-semibold text-xl md:text-2xl text-[#0b1026] bg-gradient-to-r from-[#f5c96a] via-[#fae39d] to-[#b9a7e0] shadow-2xl transition-all duration-300 ease-out hover:scale-105 active:scale-95 cursor-pointer anim-glow-pulse tracking-wide flex items-center gap-3 focus:outline-none focus:ring-4 focus:ring-gold/50"
+      aria-label="Click me for surprise"
+    >
+      <span>Click me for surprise</span>
+      <svg class="w-6 h-6 text-[#0b1026] transition-transform duration-300 group-hover:rotate-12 group-hover:scale-110" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 16.8 5.8 21.3l2.4-7.4L2 9.4h7.6z"/>
+      </svg>
+    </button>
+  </main>
+
+  <script>
+    // Generate magical cosmic sky: stationary stars, moving stars, big sparkle stars, and shooting stars
+    (function createCosmicSky() {
+      const container = document.getElementById('stars-container');
+      if (!container) return;
+      const frag = document.createDocumentFragment();
+
+      // 1. Stationary Twinkling Stars (Some stay)
+      const stationaryCount = 45;
+      for (let i = 0; i < stationaryCount; i++) {
+        const star = document.createElement('div');
+        const size = (Math.random() * 1.8 + 1).toFixed(1);
+        const top = (Math.random() * 100).toFixed(1);
+        const left = (Math.random() * 100).toFixed(1);
+        const delay = (Math.random() * 4).toFixed(2);
+        const duration = (2 + Math.random() * 3).toFixed(2);
+
+        star.className = 'absolute rounded-full bg-white anim-twinkle pointer-events-none';
+        star.style.width = `${size}px`;
+        star.style.height = `${size}px`;
+        star.style.top = `${top}%`;
+        star.style.left = `${left}%`;
+        star.style.animationDelay = `${delay}s`;
+        star.style.animationDuration = `${duration}s`;
+        star.style.boxShadow = '0 0 6px rgba(255, 255, 255, 0.85)';
+        frag.appendChild(star);
+      }
+
+      // 2. Moving / Drifting Stars (Background stars move)
+      const movingCount = 30;
+      for (let i = 0; i < movingCount; i++) {
+        const wrapper = document.createElement('div');
+        const top = (Math.random() * 95).toFixed(1);
+        const left = (Math.random() * 95).toFixed(1);
+        const driftDuration = (16 + Math.random() * 18).toFixed(1);
+        const driftDelay = (Math.random() * -15).toFixed(1);
+
+        wrapper.className = 'absolute anim-star-drift pointer-events-none';
+        wrapper.style.top = `${top}%`;
+        wrapper.style.left = `${left}%`;
+        wrapper.style.animationDuration = `${driftDuration}s`;
+        wrapper.style.animationDelay = `${driftDelay}s`;
+
+        const star = document.createElement('div');
+        const size = (Math.random() * 2 + 2).toFixed(1);
+        star.className = 'rounded-full bg-[#fdfbf7] anim-twinkle';
+        star.style.width = `${size}px`;
+        star.style.height = `${size}px`;
+        star.style.animationDelay = `${(Math.random() * 3).toFixed(2)}s`;
+        star.style.boxShadow = '0 0 8px rgba(245, 201, 106, 0.8), 0 0 16px rgba(185, 167, 224, 0.4)';
+
+        wrapper.appendChild(star);
+        frag.appendChild(wrapper);
+      }
+
+      // 3. Big Glowing & Sparkle Stars (Make some a bit big)
+      const bigStarCount = 14;
+      for (let i = 0; i < bigStarCount; i++) {
+        const isDrifting = i % 2 === 0;
+        const wrapper = document.createElement('div');
+        const top = (Math.random() * 90 + 5).toFixed(1);
+        const left = (Math.random() * 90 + 5).toFixed(1);
+
+        wrapper.className = isDrifting ? 'absolute anim-star-drift pointer-events-none' : 'absolute pointer-events-none';
+        wrapper.style.top = `${top}%`;
+        wrapper.style.left = `${left}%`;
+        if (isDrifting) {
+          wrapper.style.animationDuration = `${(22 + Math.random() * 12).toFixed(1)}s`;
+          wrapper.style.animationDelay = `${(Math.random() * -10).toFixed(1)}s`;
+        }
+
+        if (i % 2 === 0) {
+          // 4-pointed SVG sparkle diamond star
+          const starSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+          const starSize = Math.floor(Math.random() * 8 + 14); // 14px to 22px
+          starSvg.setAttribute('viewBox', '0 0 24 24');
+          starSvg.setAttribute('width', starSize);
+          starSvg.setAttribute('height', starSize);
+          starSvg.setAttribute('class', 'anim-star-sparkle text-[#f5c96a]');
+          starSvg.style.animationDelay = `${(Math.random() * 3).toFixed(2)}s`;
+          starSvg.style.animationDuration = `${(3 + Math.random() * 2).toFixed(2)}s`;
+          starSvg.style.filter = 'drop-shadow(0 0 8px rgba(245, 201, 106, 0.9))';
+
+          const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+          path.setAttribute('fill', 'currentColor');
+          path.setAttribute('d', 'M12 0L14.5 9.5L24 12L14.5 14.5L12 24L9.5 14.5L0 12L9.5 9.5Z');
+          starSvg.appendChild(path);
+          wrapper.appendChild(starSvg);
+        } else {
+          // Big luminous glowing orb (5px to 8px)
+          const bigOrb = document.createElement('div');
+          const orbSize = (Math.random() * 3 + 5).toFixed(1);
+          bigOrb.className = 'rounded-full bg-gradient-to-tr from-[#f5c96a] to-white anim-star-sparkle';
+          bigOrb.style.width = `${orbSize}px`;
+          bigOrb.style.height = `${orbSize}px`;
+          bigOrb.style.animationDelay = `${(Math.random() * 3).toFixed(2)}s`;
+          bigOrb.style.boxShadow = '0 0 12px rgba(245, 201, 106, 0.95), 0 0 24px rgba(185, 167, 224, 0.6)';
+          wrapper.appendChild(bigOrb);
+        }
+
+        frag.appendChild(wrapper);
+      }
+
+      // 4. Subtle Shooting Stars
+      const shootingStar1 = document.createElement('div');
+      shootingStar1.className = 'absolute top-12 left-1/4 w-28 h-[2px] bg-gradient-to-r from-transparent via-white to-transparent anim-shooting-star pointer-events-none';
+      shootingStar1.style.animationDelay = '2s';
+      frag.appendChild(shootingStar1);
+
+      const shootingStar2 = document.createElement('div');
+      shootingStar2.className = 'absolute top-24 left-2/3 w-36 h-[2px] bg-gradient-to-r from-transparent via-[#f5c96a] to-transparent anim-shooting-star pointer-events-none';
+      shootingStar2.style.animationDelay = '7s';
+      frag.appendChild(shootingStar2);
+
+      container.appendChild(frag);
+    })();
+
+    // Page navigation with smooth fade-out using page_fade timing (0.6s)
+    const surpriseBtn = document.getElementById('surpriseBtn');
+    surpriseBtn.addEventListener('click', () => {
+      // Prevent multiple triggers
+      surpriseBtn.disabled = true;
+      surpriseBtn.classList.remove('anim-glow-pulse');
+      
+      // Trigger page fade-out
+      document.body.classList.remove('anim-fade-in');
+      document.body.classList.add('anim-fade-out');
+
+      // Navigate after the page_fade duration (600ms)
+      setTimeout(() => {
+        window.location.href = 'main.html';
+      }, 600);
+    });
+  </script>
+</body>
+</html>

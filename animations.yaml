@@ -1,0 +1,37 @@
+glow_pulse:
+  duration: 2s
+  easing: ease-in-out
+  min_shadow: 0 0 10px rgba(255, 215, 0, 0.3)
+  max_shadow: 0 0 30px rgba(255, 215, 0, 0.8)
+
+float:
+  duration: 3s
+  distance: 10px
+
+flap_open:
+  duration: 0.8s
+  angle: -160deg
+
+letter_rise:
+  duration: 1s
+  delay: 0.6s
+  distance: 160px
+
+page_fade:
+  duration: 0.6s
+
+twinkle:
+  duration: 3s
+
+star_drift:
+  duration: 22s
+  distance: 35px
+
+star_sparkle:
+  duration: 3.5s
+
+colors:
+  midnight: "#0b1026"
+  lavender: "#b9a7e0"
+  silver: "#c0c6d4"
+  gold: "#f5c96a"
